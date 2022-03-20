@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import itertools as it
 
+
 @st.cache
 def get_stats():
     # Import data
@@ -56,6 +57,7 @@ def get_stats():
     )
     return stats
 
+
 # 2D optimization
 def simple_cull_2d(coord1, coord2):
     stats = get_stats()
@@ -88,23 +90,24 @@ def simple_cull_2d(coord1, coord2):
     stats_best = stats_best.drop(columns="Max " + coord2).sort_values(coord1)
     return coords, stats_best
 
+
 # Create MultiIndex DF for coords/stats and export to CSV
 def export_csv_2d():
     choices = [
-            "Weight",
-            "Acceleration",
-            "On-road Traction",
-            "Off-road Traction",
-            "Mini-Turbo",
-            "Ground Speed",
-            "Water Speed",
-            "Anti-gravity Speed",
-            "Air Speed",
-            "Ground Handling",
-            "Water Handling",
-            "Anti-gravity Handling",
-            "Air Handling",
-        ]
+        "Weight",
+        "Acceleration",
+        "On-road Traction",
+        "Off-road Traction",
+        "Mini-Turbo",
+        "Ground Speed",
+        "Water Speed",
+        "Anti-gravity Speed",
+        "Air Speed",
+        "Ground Handling",
+        "Water Handling",
+        "Anti-gravity Handling",
+        "Air Handling",
+    ]
     combs = [pair for pair in it.combinations(choices, 2)]
     results = list(zip(*[simple_cull_2d(*name) for name in combs]))
     coords_2d = results[0]
@@ -126,10 +129,13 @@ def export_csv_2d():
     stats_best_2d_df.to_csv("2dStats.csv")
     return
 
+
 # 3D Optimization
 def simple_cull_3d(coord1, coord2, coord3):
     stats = get_stats()
-    inputPoints = stats[[coord1, coord2, coord3]].drop_duplicates().reset_index(drop=True)
+    inputPoints = (
+        stats[[coord1, coord2, coord3]].drop_duplicates().reset_index(drop=True)
+    )
     candidateRowNr = 0
     pareto_points = pd.DataFrame({coord1: [], coord2: [], coord3: []})
     while True:
@@ -139,9 +145,9 @@ def simple_cull_3d(coord1, coord2, coord3):
         nonDominated = True
         while len(inputPoints) != 0 and rowNr < len(inputPoints):
             row = inputPoints.iloc[rowNr]
-            if ((candidateRow >= row).all()):
+            if (candidateRow >= row).all():
                 inputPoints = inputPoints.drop([rowNr]).reset_index(drop=True)
-            elif ((row >= candidateRow).all()):
+            elif (row >= candidateRow).all():
                 nonDominated = False
                 rowNr += 1
             else:
@@ -152,42 +158,103 @@ def simple_cull_3d(coord1, coord2, coord3):
         if len(inputPoints) == 0:
             break
     coords = pareto_points.sort_values(coord1)
-    coords_renamed = coords.rename(columns={coord1: coord1, coord2: coord2, coord3: 'Max ' + coord3})
+    coords_renamed = coords.rename(
+        columns={coord1: coord1, coord2: coord2, coord3: "Max " + coord3}
+    )
     merged = stats.merge(coords_renamed, on=[coord1, coord2])
-    stats_best = merged[merged[coord3] == merged['Max ' + coord3]]
-    stats_best = stats_best.drop(columns='Max ' + coord3).sort_values(coord1)
+    stats_best = merged[merged[coord3] == merged["Max " + coord3]]
+    stats_best = stats_best.drop(columns="Max " + coord3).sort_values(coord1)
     return coords, stats_best
+
 
 # Create MultiIndex DF for coords/stats and export to CSV
 def export_csv_3d():
     choices = [
-            "Weight",
-            "Acceleration",
-            "On-road Traction",
-            "Off-road Traction",
-            "Mini-Turbo",
-            "Ground Speed",
-            "Water Speed",
-            "Anti-gravity Speed",
-            "Air Speed",
-            "Ground Handling",
-            "Water Handling",
-            "Anti-gravity Handling",
-            "Air Handling",
-        ]
+        "Weight",
+        "Acceleration",
+        "On-road Traction",
+        "Off-road Traction",
+        "Mini-Turbo",
+        "Ground Speed",
+        "Water Speed",
+        "Anti-gravity Speed",
+        "Air Speed",
+        "Ground Handling",
+        "Water Handling",
+        "Anti-gravity Handling",
+        "Air Handling",
+    ]
     combs = [triplet for triplet in it.permutations(choices, 3)]
     results = list(zip(*[simple_cull_3d(*name) for name in combs]))
     coords_3d = results[0]
     stats_best_3d = results[1]
 
-    coords_3d_dict = {choice:coord for choice, coord in zip(combs, coords_3d)}
-    stats_best_3d_dict = {choice:stat for choice, stat in zip(combs, stats_best_3d)}
-    coords_3d_df = pd.concat(coords_3d_dict.values(), keys=coords_3d_dict.keys(), names=['Coord1', 'Coord2', 'Coord3', 'Ind'])
-    coords_3d_df.to_csv('3dCoords.csv')
-    stats_best_3d_df = pd.concat(stats_best_3d_dict.values(), keys=stats_best_3d_dict.keys(), names=['Coord1', 'Coord2', 'Coord3', 'Ind'])
-    stats_best_3d_df.to_csv('3dStats.csv')
+    coords_3d_dict = {choice: coord for choice, coord in zip(combs, coords_3d)}
+    stats_best_3d_dict = {choice: stat for choice, stat in zip(combs, stats_best_3d)}
+    coords_3d_df = pd.concat(
+        coords_3d_dict.values(),
+        keys=coords_3d_dict.keys(),
+        names=["Coord1", "Coord2", "Coord3", "Ind"],
+    )
+    coords_3d_df.to_csv("3dCoords.csv")
+    stats_best_3d_df = pd.concat(
+        stats_best_3d_dict.values(),
+        keys=stats_best_3d_dict.keys(),
+        names=["Coord1", "Coord2", "Coord3", "Ind"],
+    )
+    stats_best_3d_df.to_csv("3dStats.csv")
     return
 
-if __name__ == '__main__': 
-    export_csv_2d()
-    export_csv_3d()
+
+def simple_cull_13d():
+    stats = get_stats()
+    inputPoints = stats.copy().drop_duplicates().reset_index(drop=True)
+    candidateRowNr = 0
+    choices = [
+        "Weight",
+        "Acceleration",
+        "On-road Traction",
+        "Off-road Traction",
+        "Mini-Turbo",
+        "Ground Speed",
+        "Water Speed",
+        "Anti-gravity Speed",
+        "Air Speed",
+        "Ground Handling",
+        "Water Handling",
+        "Anti-gravity Handling",
+        "Air Handling",
+    ]
+    pareto_points = pd.DataFrame(columns=choices)
+    while True:
+        candidateRow = inputPoints.iloc[candidateRowNr]
+        inputPoints = inputPoints.drop([candidateRowNr]).reset_index(drop=True)
+        rowNr = 0
+        nonDominated = True
+        while len(inputPoints) != 0 and rowNr < len(inputPoints):
+            row = inputPoints.iloc[rowNr]
+            if (candidateRow >= row).all():
+                inputPoints = inputPoints.drop([rowNr]).reset_index(drop=True)
+            elif (row >= candidateRow).all():
+                nonDominated = False
+                rowNr += 1
+            else:
+                rowNr += 1
+        if nonDominated:
+            pareto_points = pareto_points.append([candidateRow], ignore_index=True)
+
+        if len(inputPoints) == 0:
+            break
+
+    coords = pareto_points.sort_values("Weight")
+    return coords
+
+
+def export_csv_13d():
+    coords_13d = simple_cull_13d()
+    coords_13d.to_csv("AllCoords.csv")
+    return
+
+
+if __name__ == "__main__":
+    export_csv_13d()

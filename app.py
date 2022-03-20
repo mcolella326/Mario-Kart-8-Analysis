@@ -3,24 +3,53 @@ import dataManipulation
 
 st.set_page_config(layout="wide")
 
-st.sidebar.write("Select an optimization method:")  # Filler text, to be adjusted
-choice = st.sidebar.radio('', ("Mode 1", "Mode 2"))  # Filler text, to be adjusted
+st.sidebar.write("Select an optimization method:")
+choice = st.sidebar.radio("", ("Optimize by Kart Selection", "Optimize by Stats"))
 
-# Mode 1: Pareto optimizations based on selecting kart combos and recommending better ones based on a 13-way optimization
-if choice == "Mode 1":
-    st.write("TODO: Make Mode 1")  # Filler text, to be adjusted
+# Streamlit title/subtitle
+row1_1, _, row1_2 = st.columns((1.75, 1.5, 1.5))
 
-# Mode 2: Pareto optimal combinations based on 3 unique criteria
+row1_1.header("Pareto Optimal Mario Kart Combinations")
+
+with row1_2:
+    st.write("")
+    row1_2.subheader("A Web App by [Mike Colella](https://github.com/mcolella326)")
+
+# Optimize by Kart Selection: Pareto optimizations based on selecting kart combos and recommending better ones based on a 13-way optimization
+if choice == "Optimize by Kart Selection":
+    char_list, kart_list, wheel_list, glider_list = dataManipulation.get_options()
+
+    st.sidebar.write("Select a character, kart, wheel, and glider:")
+    char = st.sidebar.selectbox("Character", options=char_list)
+    kart = st.sidebar.selectbox("Kart", options=kart_list)
+    wheel = st.sidebar.selectbox("Wheel", options=wheel_list)
+    glider = st.sidebar.selectbox("Glider", options=glider_list)
+
+    selected = dataManipulation.get_selected_pareto(char, kart, wheel, glider)
+
+    if not (selected).empty:
+        ind_max = selected.idxmax(1).squeeze()
+        ind_min = selected.idxmin(1).squeeze()
+        st.write(
+            "This is a pareto-optimal combination! Its best stat is "
+            + f"{ind_max} "
+            + "at "
+            + f"{selected[ind_max].max()} "
+            + "and its worst stat is "
+            + f"{ind_min} "
+            "at " + f"{selected[ind_min].min()}."
+        )
+        st.write("See below for all stats:")
+        st.dataframe(selected, width=20000)
+
+    else:
+        st.write(
+            "Ths is not a pareto optimal combination. See below for a list of dominating combinations:"
+        )
+        dataManipulation.get_dominated(char, kart, wheel, glider)
+
+# Optimize by Stats: Pareto optimal combinations based on 3 unique criteria
 else:
-    # Streamlit title/subtitle
-    row1_1, _, row1_2 = st.columns((1.75, 1.5, 1.5))
-
-    row1_1.header("Three-Way Pareto Optimal Mario Kart Combinations")
-
-    with row1_2:
-        st.write("")
-        row1_2.subheader("A Web App by [Mike Colella](https://github.com/mcolella326)")
-
     # Streamlit dropdown selection - updates all dropdowns on update such that you cannot select the same option for 2 or more dropdowns at once
     @st.cache(
         allow_output_mutation=True
