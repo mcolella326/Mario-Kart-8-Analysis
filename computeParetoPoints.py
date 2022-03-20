@@ -5,6 +5,7 @@ import itertools as it
 
 @st.cache
 def get_stats():
+    """ Get combined statistics for each combination of character, kart, wheel, and glider """
     # Import data
     data = pd.read_csv(r"MK8Data.csv", index_col="Names").dropna()
 
@@ -60,6 +61,7 @@ def get_stats():
 
 # 2D optimization
 def simple_cull_2d(coord1, coord2):
+    """ Algorithm to obtain pareto optimal coordinates for 2 dimensions """
     stats = get_stats()
     inputPoints = stats[[coord1, coord2]].drop_duplicates().reset_index(drop=True)
     candidateRowNr = 0
@@ -93,6 +95,7 @@ def simple_cull_2d(coord1, coord2):
 
 # Create MultiIndex DF for coords/stats and export to CSV
 def export_csv_2d():
+    """ Export simple cull algo results as CSV (2dCoords/Stats.csv) """
     choices = [
         "Weight",
         "Acceleration",
@@ -132,6 +135,7 @@ def export_csv_2d():
 
 # 3D Optimization
 def simple_cull_3d(coord1, coord2, coord3):
+    """ Algorithm to obtain pareto optimal coordinates for 3 dimensions """
     stats = get_stats()
     inputPoints = (
         stats[[coord1, coord2, coord3]].drop_duplicates().reset_index(drop=True)
@@ -169,6 +173,7 @@ def simple_cull_3d(coord1, coord2, coord3):
 
 # Create MultiIndex DF for coords/stats and export to CSV
 def export_csv_3d():
+    """ Export simple cull algo results as CSV (3dCoords/Stats.csv) """
     choices = [
         "Weight",
         "Acceleration",
@@ -207,6 +212,7 @@ def export_csv_3d():
 
 
 def simple_cull_13d():
+    """ Algorithm to obtain pareto optimal coordinates for all 13 criteria """
     stats = get_stats()
     inputPoints = stats.copy().drop_duplicates().reset_index(drop=True)
     candidateRowNr = 0
@@ -251,6 +257,7 @@ def simple_cull_13d():
 
 
 def export_csv_13d():
+    """ Export simple cull algo results as CSV (AllCoords.csv) """
     coords_13d = simple_cull_13d()
     coords_13d.to_csv("AllCoords.csv")
     return

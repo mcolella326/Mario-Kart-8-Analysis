@@ -31,7 +31,7 @@ if choice == "Optimize by Kart Selection":
         ind_max = selected.idxmax(1).squeeze()
         ind_min = selected.idxmin(1).squeeze()
         st.write(
-            "This is a pareto-optimal combination! Its best stat is "
+            "This is a pareto optimal combination! Its best stat is "
             + f"{ind_max} "
             + "at "
             + f"{selected[ind_max].max()} "
@@ -58,7 +58,7 @@ else:
         return {}
 
     def display_dropdowns():
-        # Get unique options and corresponding index value for each dropdown (unique indices generated for each dropdown for each dropdown combination)
+        """Get unique options and corresponding index value for each dropdown (unique indices generated for each dropdown for each dropdown combination)"""
         options = [
             "Weight",
             "Acceleration",
@@ -141,20 +141,20 @@ else:
     dataManipulation.plot_3d(coord_x, coord_y, coord_z)
 
 # Add additional information
-_, row4, _ = st.columns((0.1, 3.2, 0.1))
-with row4:
+_, row2, _ = st.columns((0.1, 3.2, 0.1))
+with row2:
     st.markdown("___")
     about = st.expander("About/Additional Info")
     with about:
-        """Thanks for checking out my app! It was built entirely using Mario Kart 8 statistic found on [Mario Wiki](https://www.mariowiki.com/Mario_Kart_8_Deluxe_in-game_statistics). Special thanks to 
+        """Thanks for checking out my app! It was built entirely using Mario Kart 8 statistics found on [Mario Wiki](https://www.mariowiki.com/Mario_Kart_8_Deluxe_in-game_statistics). Special thanks to 
         [eigenfoo](https://github.com/eigenfoo) for introducing me to Streamlit.
         This is the first time I have ever built something like this, and any comments/suggestions are appreciated!"""
 
-        """This app aggregates all data from 3 user-selected categories and displays a pareto-optimal curve between each two variables and generates a 3D pareto-optimal surface for all 3 variables. Additionally,
-        a set of "best performing" characters for each pareto-optimal point. These statistics are optimized under a set of various statistics described below:"""
-
-        """**Weight** - Weight"""
-
-        """etc."""
+        """This app optimizes Mario Kart selections based on two methods. The first method determines all pareto optimal combinations from the 13 unique statistics Mario Wiki offers, and asks the user to select
+        a specific character, kart, wheel set, and glider set. If the combination is pareto optimal, the statistics for this combination will be provided. If the combination is not pareto optimal, a set of
+        dominating combinations and the corresponding statistics for each combination are provided."""
+        
+        """The second method asks the user for three unique criteria to optimize under, and both 2D projected graphs and a 3D graph of the pareto optimal curves/surfaces are provided. Additionally, the set of
+        pareto optimal combinations for the 3D data set with the corresponding statistics for each combination are provided."""
 
         """### Mike Colella, 2022"""
