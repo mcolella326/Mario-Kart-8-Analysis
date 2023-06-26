@@ -264,4 +264,6 @@ def export_csv_13d():
 
 
 if __name__ == "__main__":
+    export_csv_2d()
+    export_csv_3d()
     export_csv_13d()
